@@ -4,24 +4,24 @@
  *
  * This file is part of the ST Nomadik Multiprocessing Framework.
  *
- * The NMF Definition is free software; you can redistribute it and/or modify it 
- * under the terms of the GNU Library General Public License as published by 
+ * The NMF Definition is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Library General Public License as published by
  * the Free Software Foundation; version 2.
- * 
- * The NMF Definition is distributed in the hope that it will be useful, but WITHOUT 
+ *
+ * The NMF Definition is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
  * for more details.
  *
- * You should have received a copy of the GNU Library General Public License 
+ * You should have received a copy of the GNU Library General Public License
  * along with the NMF Definition; see the file lgpl-2.1.txt.  If not, write to the Free
  * Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  * Written by NMF team.
  */
 #ifndef _COMMON_TYPE_H_
-#define _COMMON_TYPE_H_ 
+#define _COMMON_TYPE_H_
 
 /*
  * Definition of type that are used by interface.

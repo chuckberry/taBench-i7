@@ -10,17 +10,18 @@
 
 #include "mixer.h"
 
-class mixer2mixer: public mixer {
+class mixer2mixer: public mixer
+{
 private:
-	mixer &out_mixer;
-	int pos;
+    mixer &out_mixer;
+    int pos;
 
 public:
-	mixer2mixer(mixer &_out, int _pos): mixer(_pos), out_mixer(_out), pos(_pos) {};
+    mixer2mixer(mixer &_out, int _pos): mixer(_pos), out_mixer(_out), pos(_pos) {};
 
-	virtual void output() {
-		out_mixer.emptyBuffer(buffer, pos);
-	}
+    virtual void output() {
+        out_mixer.emptyBuffer(buffer, pos);
+    }
 };
 
 #endif /* MIXER2MIXER_H_ */

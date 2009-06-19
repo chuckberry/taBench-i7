@@ -12,16 +12,17 @@
 
 #include "mixer.h"
 
-class mixer2sink: public mixer {
+class mixer2sink: public mixer
+{
 public:
-	mixer2sink() : mixer (2) {};
+    mixer2sink() : mixer (2) {};
 
-	virtual void output() {
-		int written = write(1, buffer, BUFLENBYTE);
-		if(written != BUFLENBYTE) {
-			fprintf(stderr, "Wrote %i bytes\n", written);
-		}
-	}
+    virtual void output() {
+        int written = write(1, buffer, BUFLENBYTE);
+        if (written != BUFLENBYTE) {
+            fprintf(stderr, "Wrote %i bytes\n", written);
+        }
+    }
 };
 
 #endif /* MIXER2SINK_H_ */

@@ -14,27 +14,28 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-class mixer {
- private:
-	 t_sint16 *inbuf0;
-	 t_sint16 *inbuf1;
+class mixer
+{
+private:
+    t_sint16 *inbuf0;
+    t_sint16 *inbuf1;
 
-	 pthread_mutex_t mutex;
-	 sem_t sema0;
-	 sem_t sema1;
-	 sem_t notifier;
+    pthread_mutex_t mutex;
+    sem_t sema0;
+    sem_t sema1;
+    sem_t notifier;
 
-	 void loop();
-	 virtual void output()=0;
+    void loop();
+    virtual void output()=0;
 
-	 static void *start_routine(void *_this);
-     int index;
- protected:
-	 t_sint16 buffer[BUFLENWORD];
+    static void *start_routine(void *_this);
+    int index;
+protected:
+    t_sint16 buffer[BUFLENWORD];
 
- public:
-	 mixer(int _index);
-	 void emptyBuffer(t_sint16 *buf, int pos);
+public:
+    mixer(int _index);
+    void emptyBuffer(t_sint16 *buf, int pos);
 };
 
 #endif /* MIXER_H_ */
