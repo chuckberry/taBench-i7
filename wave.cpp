@@ -30,7 +30,7 @@ void *wave::start_routine(void *_this)
 
     sprintf (name, "wave%d", obj->index);
     prctl(PR_SET_NAME, name, 0,0,0);
-    fprintf(stderr,"wave%d %ld\n", obj->index, gettid());
+
     obj->loop();
     return NULL;
 }

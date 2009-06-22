@@ -11,6 +11,5 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 
-#define gettid() syscall(SYS_gettid)
 
 #endif // __CONST_IDT

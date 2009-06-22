@@ -45,10 +45,10 @@ void *mixer::start_routine(void *_this)
 {
     char name[10];
     mixer *obj = (mixer *)_this;
+
     sprintf (name, "wave%d", obj->index);
     prctl(PR_SET_NAME, name, 0,0,0);
 
-    fprintf(stderr, "mixer%d %ld\n", obj->index, gettid());
     obj->loop();
     return NULL;
 }
