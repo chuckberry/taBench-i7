@@ -46,7 +46,7 @@ void *mixer::start_routine(void *_this)
     char name[10];
     mixer *obj = (mixer *)_this;
 
-    sprintf (name, "wave%d", obj->index);
+    sprintf (name, "mixer%d", obj->index);
     prctl(PR_SET_NAME, name, 0,0,0);
 
     obj->loop();
