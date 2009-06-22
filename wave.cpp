@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <strings.h>
 #include <unistd.h>
+#include <sys/prctl.h>
 
 void wave::kickoff()
 {
@@ -24,7 +25,11 @@ void wave::kickoff()
 
 void *wave::start_routine(void *_this)
 {
+    char name[10];
     wave *obj = (wave *)_this;
+
+    sprintf (name, "wave%d", obj->index);
+    prctl(PR_SET_NAME, name, 0,0,0);
     fprintf(stderr,"wave%d %ld\n", obj->index, gettid());
     obj->loop();
     return NULL;
