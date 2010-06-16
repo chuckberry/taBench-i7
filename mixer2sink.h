@@ -14,7 +14,7 @@
 
 class mixer2sink: public mixer {
 public:
-	mixer2sink() {};
+	mixer2sink() : mixer (2) {};
 
 	virtual void output() {
 		int written = write(1, buffer, BUFLENBYTE);

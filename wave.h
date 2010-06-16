@@ -8,8 +8,8 @@
 #ifndef WAVE_H_
 #define WAVE_H_
 
-#include "../components/const.h" // BUFLENWORD, BUFLENBYTE
-#include "share/inc/type.h" // t_sint16
+#include "const.h" // BUFLENWORD, BUFLENBYTE
+#include "type.h" // t_sint16
 
 #include "mixer.h"
 
@@ -25,11 +25,11 @@ class wave {
   void loop();
 
   static void *start_routine(void *_this);
-
+  int index;
  public:
-  wave(mixer &_mixer, int _pos, t_uint32 _width, t_uint32 _height):
+  wave(int _index, mixer &_mixer, int _pos, t_uint32 _width, t_uint32 _height):
 	  my_mixer(_mixer), pos(_pos),
-	  width(_width), height(_height) {
+	  width(_width), height(_height), index(_index) {
 		  kickoff();
 	}
 };

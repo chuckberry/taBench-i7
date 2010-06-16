@@ -11,7 +11,9 @@
 #include <errno.h>
 #include <strings.h>
 
-mixer::mixer() {
+
+
+mixer::mixer(int _index) : index(_index){
 	pthread_t thr;
 	int err;
 
@@ -40,7 +42,7 @@ mixer::mixer() {
 
 void *mixer::start_routine(void *_this) {
 	mixer *obj = (mixer *)_this;
-
+	fprintf(stderr, "mixer%d %ld\n", obj->index, gettid());
 	obj->loop();
 	return NULL;
 }

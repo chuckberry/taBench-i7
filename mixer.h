@@ -8,8 +8,8 @@
 #ifndef MIXER_H_
 #define MIXER_H_
 
-#include "../components/const.h" // BUFLENWORD, BUFLENBYTE
-#include "share/inc/type.h" // t_sint16
+#include "const.h" // BUFLENWORD, BUFLENBYTE
+#include "type.h" // t_sint16
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -28,12 +28,12 @@ class mixer {
 	 virtual void output()=0;
 
 	 static void *start_routine(void *_this);
-
+     int index;
  protected:
 	 t_sint16 buffer[BUFLENWORD];
 
  public:
-	 mixer();
+	 mixer(int _index);
 	 void emptyBuffer(t_sint16 *buf, int pos);
 };
 

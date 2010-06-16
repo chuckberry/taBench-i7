@@ -16,7 +16,7 @@ private:
 	int pos;
 
 public:
-	mixer2mixer(mixer &_out, int _pos): out_mixer(_out), pos(_pos) {};
+	mixer2mixer(mixer &_out, int _pos): mixer(_pos), out_mixer(_out), pos(_pos) {};
 
 	virtual void output() {
 		out_mixer.emptyBuffer(buffer, pos);

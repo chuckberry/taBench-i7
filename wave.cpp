@@ -23,7 +23,7 @@ void wave::kickoff() {
 
 void *wave::start_routine(void *_this) {
 	wave *obj = (wave *)_this;
-
+	fprintf(stderr,"wave%d %ld\n", obj->index, gettid());
 	obj->loop();
 	return NULL;
 }
