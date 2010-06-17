@@ -11,5 +11,12 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 
+#define __NR_sched_add_taskaffinity 337
+#define sched_add_taskaffinity(tsk) \
+	syscall(__NR_sched_add_taskaffinity, tsk)
+
+#define __NR_sched_del_taskaffinity 338
+#define sched_del_taskaffinity(tsk) \
+	syscall(__NR_sched_del_taskaffinity, tsk)
 
 #endif // __CONST_IDT
