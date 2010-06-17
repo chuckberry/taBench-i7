@@ -14,8 +14,15 @@
 
 void wave::kickoff()
 {
+    int err;
+
+    err = sem_init(&sem_tid, 0, 0);
+    if (err != 0) {
+        perror("wave::sem_tid");
+    }
+
     pthread_t thr;
-    int err = pthread_create(&thr, NULL, start_routine, (void *)this);
+    err = pthread_create(&thr, NULL, start_routine, (void *)this);
     if (err != 0) {
         perror("wave::kickoff");
     }
