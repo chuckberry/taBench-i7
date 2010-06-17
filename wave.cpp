@@ -7,11 +7,9 @@
 
 #include "wave.h"
 
-#include <pthread.h>
 #include <stdio.h>
 #include <errno.h>
 #include <strings.h>
-#include <unistd.h>
 #include <sys/prctl.h>
 
 void wave::kickoff()
@@ -23,10 +21,28 @@ void wave::kickoff()
     }
 }
 
+pid_t wave::get_tid()
+{
+    /* can be called only once, otherwise it will block forever */
+    int err = sem_wait(&sem_tid);
+    if (err != 0 )
+        perror("wave::sem_wait = sem_tid");
+    if (!tid)
+        fprintf(stderr, "error synchronizing to get tid.\n");
+
+    return tid;
+}
+
 void *wave::start_routine(void *_this)
 {
     char name[10];
     wave *obj = (wave *)_this;
+
+    obj->tid = gettid();
+
+    int err = sem_post(&obj->sem_tid);
+    if (err != 0)
+        perror("wave::sem_post - sem_tid");
 
     sprintf (name, "wave%d", obj->index);
     prctl(PR_SET_NAME, name, 0,0,0);

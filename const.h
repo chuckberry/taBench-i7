@@ -11,6 +11,8 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 
+#define gettid() syscall(SYS_gettid)
+
 #define __NR_sched_add_taskaffinity 337
 #define sched_add_taskaffinity(tsk) \
 	syscall(__NR_sched_add_taskaffinity, tsk)

@@ -12,8 +12,7 @@
 #include <strings.h>
 #include <sys/prctl.h>
 
-
-mixer::mixer(int _index) : index(_index)
+mixer::mixer(int _index) : index(_index), tid(0)
 {
     pthread_t thr;
     int err;
@@ -35,16 +34,39 @@ mixer::mixer(int _index) : index(_index)
         perror("mixer::sem_init - notifier");
     }
 
+    err = sem_init(&sem_tid, 0, 0);
+    if (err != 0) {
+	    perror("mixer::sem_tid");
+    }
+
     err = pthread_create(&thr, NULL, start_routine, (void *)this);
     if (err != 0) {
         perror("mixer::kickoff");
     }
 }
 
+pid_t mixer::get_tid()
+{
+    /* can be called only once, otherwise it will block forever */
+    int err = sem_wait(&sem_tid);
+    if (err != 0 )
+        perror("mixer::sem_wait = sem_tid");
+    if (!tid)
+        fprintf(stderr, "error synchronizing to get tid.\n");
+
+    return tid;
+}
+
 void *mixer::start_routine(void *_this)
 {
     char name[10];
     mixer *obj = (mixer *)_this;
+
+    obj->tid = gettid();
+
+    int err = sem_post(&obj->sem_tid);
+    if (err != 0)
+        perror("mixer::sem_post - sem_tid");
 
     sprintf (name, "mixer%d", obj->index);
     prctl(PR_SET_NAME, name, 0,0,0);
