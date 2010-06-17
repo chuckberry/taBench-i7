@@ -1,28 +1,39 @@
 # Check for all warnings and make them become an error
-CPPFLAGS += -Wall -O3 -pthread
+CFLAGS += -Wall -O3
+CPPFLAGS = $(CFLASG) -pthread
 ifdef TASKAFFINITY
 	CPPFLAGS += -DTASKAFFINITY
 endif
-LDFLAGS += -lrt
 
-OBJS += mixer.o wave.o nwBench.o
+B_LDFLAGS += -lrt
+B_OBJS += mixer.o wave.o nwBench.o
+
+M_LDFLAGS += -lm -lrt
+M_OBJS += monitor.o
 
 all:
 	@make nwBench
 	@make soft-clean
 	@make TASKAFFINITY=1 nwBench-taskaff
+	@make monitor
 
-nwBench: $(OBJS)
-	g++ $(OBJS) $(LDFLAGS) -pthread -o $@
+nwBench: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@
 
-nwBench-taskaff: $(OBJS)
-	g++ $(OBJS) $(LDFLAGS) -pthread -o $@
+nwBench-taskaff: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@
+
+monitor: $(M_OBJS)
+	gcc $(M_LDFLAGS) $(M_OBJS) -o $@
 
 soft-clean:
 	rm -rf *.o *~
 
 clean: soft-clean
-	rm -rf nwBench{,-taskaff}
+	rm -rf nwBench{,-taskaff} monitor
+
+%.o : %.c
+	gcc $(CFLAGS) -c -o $@ $<
 
 %.o : %.cpp
 	g++ $(CPPFLAGS) -c -o $@ $<
