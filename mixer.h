@@ -26,8 +26,10 @@ private:
     sem_t sema1;
     sem_t notifier;
     sem_t sem_tid;
+    sem_t sem_start;
     int index;
     pid_t tid;
+    pid_t dep0, dep1;
 
     void loop();
     virtual void output()=0;
@@ -38,6 +40,7 @@ protected:
 
 public:
     mixer(int _index);
+    void start(pid_t t0, pid_t t1);
     pid_t get_tid();
     void emptyBuffer(t_sint16 *buf, int pos);
 };

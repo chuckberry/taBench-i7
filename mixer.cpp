@@ -36,7 +36,12 @@ mixer::mixer(int _index) : index(_index), tid(0)
 
     err = sem_init(&sem_tid, 0, 0);
     if (err != 0) {
-	    perror("mixer::sem_tid");
+        perror("mixer::sem_tid");
+    }
+
+    err = sem_init(&sem_start, 0, 0);
+    if (err != 0) {
+        perror("mixer::sem_start - 0");
     }
 
     err = pthread_create(&thr, NULL, start_routine, (void *)this);
@@ -75,10 +80,27 @@ void *mixer::start_routine(void *_this)
     return NULL;
 }
 
+void mixer::start(pid_t t0, pid_t t1)
+{
+    dep0 = t0;
+    dep1 = t1;
+
+    int err = sem_post(&sem_start);
+    if (err != 0)
+        perror("mixer::start - sem_post");
+}
+
 void mixer::loop()
 {
     t_sint16 sample;
     int err;
+
+    sem_wait(&sem_start);
+
+#ifdef TASKAFFINITY
+    sched_add_taskaffinity(dep0);
+    sched_add_taskaffinity(dep1);
+#endif
 
     while (1) {
         sem_wait(&notifier);
