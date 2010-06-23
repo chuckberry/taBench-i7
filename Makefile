@@ -11,6 +11,10 @@ B_OBJS += mixer.o wave.o nwBench.o
 M_LDFLAGS += -lm -lrt
 M_OBJS += monitor.o
 
+VERSION = \"$(shell tools/setlocalversion)\"
+CFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
+CPPFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
+
 all:
 	@make nwBench
 	@make soft-clean

@@ -286,9 +286,9 @@ static void do_stat()
     /* fprintf(worker_arg->f, "# Produced by %s.%s, built on %s\n",
        PROJECT, VERSION, BUILD_DATE); */
     fprintf(fout_trace,
-	    "# From RCS $Id: monitor.c,v 1.10 2009/06/23 11:58:50 betzwlin Exp $\n");
+	    "# Code version: monitor" CONFIG_CODE_VERSION "\n");
     fprintf(fout_hist,
-	    "# From RCS $Id: monitor.c,v 1.10 2009/06/23 11:58:50 betzwlin Exp $\n");
+	    "# Code version: monitor" CONFIG_CODE_VERSION "\n");
 
     /* Dump cpuinfo */
     dump_cpuinfo(fout_trace);
@@ -322,6 +322,8 @@ int main(int argc, char *argv[])
 {
     char *idString = "no_identifier";
     sigset_t blocked_signals;
+
+    fprintf(stderr, "Code version: %s" CONFIG_CODE_VERSION "\n", argv[0]);
 
     if (argc > 1)
 	idString = argv[1];
