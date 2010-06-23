@@ -1,5 +1,6 @@
 *.o
-nwBench
-monitor
-nwBench-taskaff
 *.swp
+nwBench
+nwBench-taskaff
+monitor
+monitor-ftrace

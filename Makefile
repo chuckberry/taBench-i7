@@ -1,8 +1,12 @@
+
 # Check for all warnings and make them become an error
 CFLAGS += -Wall -O3
 CPPFLAGS = $(CFLASG) -pthread
 ifdef TASKAFFINITY
 	CPPFLAGS += -DTASKAFFINITY
+endif
+ifdef FTRACE
+	CFLAGS += -DCONFIG_USE_FTRACE
 endif
 
 B_LDFLAGS += -lrt
@@ -20,6 +24,8 @@ all:
 	@make soft-clean
 	@make TASKAFFINITY=1 nwBench-taskaff
 	@make monitor
+	@make soft-clean
+	@make FTRACE=1 monitor-ftrace
 
 nwBench: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@
@@ -30,11 +36,14 @@ nwBench-taskaff: $(B_OBJS)
 monitor: $(M_OBJS)
 	gcc $(M_LDFLAGS) $(M_OBJS) -o $@
 
+monitor-ftrace: $(M_OBJS)
+	gcc $(M_LDFLAGS) $(M_OBJS) -o $@
+
 soft-clean:
 	rm -rf *.o *~
 
 clean: soft-clean
-	rm -rf nwBench{,-taskaff} monitor
+	rm -rf nwBench{,-taskaff} monitor{,-ftrace}
 
 %.o : %.c
 	gcc $(CFLAGS) -c -o $@ $<
