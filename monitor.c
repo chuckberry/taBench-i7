@@ -35,9 +35,9 @@
 #define FILE_NAME_HIST "_histg"
 
 #ifdef CONFIG_LONG_RUN
-# define NR_SAMPLES 150000
+# define NR_SAMPLES 150
 #else
-# define NR_SAMPLES 15000
+# define NR_SAMPLES 150
 #endif
 
 #define US_SLEEP 250
@@ -64,7 +64,7 @@ static struct timespec wake_time[NR_SAMPLES];
 static long wake_time_hist[HIST_BINS];
 
 
-#ifdef CONFIG_USE_FTRACE
+#if defined CONFIG_USE_TRACING 
 # ifndef CONFIG_KDEBUG_MOUNT
 #  define CONFIG_KDEBUG_MOUNT "/sys/kernel/debug/"
 # endif
@@ -72,17 +72,18 @@ static long wake_time_hist[HIST_BINS];
 # ifndef CONFIG_FTRACE_MEM
 #  define CONFIG_FTRACE_MEM "100000"
 # endif
-# ifndef CONFIG_TRACING_FUNCTIONS
-#  define CONFIG_TRACING_FUNCTIONS ""	\
-	"try_to_wake_up "
-# endif
-# ifndef CONFIG_TRACING_FILTERS
-#  define CONFIG_TRACING_FILTERS ""	\
-	"try_to_wake_up "		\
-	"task_woken_rt " 		\
-	"try_to_wake_up " 		\
-	"select_task_rq_rt "
-# endif
+# ifdef CONFIG_USE_FTRACE
+#  ifndef CONFIG_TRACING_FUNCTIONS
+#   define CONFIG_TRACING_FUNCTIONS ""	\
+	 "try_to_wake_up "
+#  endif
+#  ifndef CONFIG_TRACING_FILTERS
+#   define CONFIG_TRACING_FILTERS ""	\
+	 "task_woken_rt " 		\
+	 "try_to_wake_up " 		\
+	 "select_task_rq_rt "
+#  endif
+# endif /* CONFIG_USE_FTRACE */
 # define FTRACE_OPEN(FD,ATTR)				\
 	fprintf(stderr, "Opening file "			\
 			TRACING_PATH ATTR		\
@@ -98,52 +99,105 @@ static long wake_time_hist[HIST_BINS];
 		return -1;				\
 	}
 
+# define FTRACE_CLOSE(FD,ATTR)				\
+	fprintf(stderr, "Closing file "			\
+			TRACING_PATH ATTR		\
+			"...\n");			\
+	close(FD);	
+
 int fd_tracing_enabled = 0;
 int fd_tracing_current = 0;
+int fd_tracing_buffersize = 0;
+//int fd_funcgraph_printk = 0;
+
+# ifdef CONFIG_USE_FTRACE
 int fd_set_graph_function = 0;
 int fd_set_ftrace_filter = 0;
-int fd_tracing_buffersize = 0;
-
 int fd_funcgraph_cpu = 0;
 int fd_funcgraph_proc = 0;
 int fd_funcgraph_abstime = 0;
 int fd_funcgraph_duration = 0;
+# endif
 
 int ftrace_setup(void) {
 
 	fprintf(stderr, "Configuring Ftrace...\n");
 	FTRACE_OPEN(fd_tracing_enabled,"tracing_enabled");
 	FTRACE_OPEN(fd_tracing_current,"current_tracer");
+	FTRACE_OPEN(fd_tracing_buffersize,"buffer_size_kb");
+	FTRACE_CONF(fd_tracing_enabled, "0");
+	FTRACE_CONF(fd_tracing_current, "nop\n");
+	FTRACE_CONF(fd_tracing_buffersize, CONFIG_FTRACE_MEM);
+// 	FTRACE_OPEN(fd_funcgraph_printk,"options/trace_printk");
+
+# ifdef CONFIG_USE_FTRACE
 	FTRACE_OPEN(fd_set_graph_function,"set_graph_function");
 	FTRACE_OPEN(fd_set_ftrace_filter,"set_ftrace_filter");
-	FTRACE_OPEN(fd_tracing_buffersize,"buffer_size_kb");
-
-	FTRACE_CONF(fd_tracing_enabled, "0");
-	FTRACE_CONF(fd_tracing_current, "function_graph");
-	FTRACE_CONF(fd_set_graph_function, CONFIG_TRACING_FUNCTIONS);
-	FTRACE_CONF(fd_set_ftrace_filter, CONFIG_TRACING_FILTERS);
-	FTRACE_CONF(fd_tracing_buffersize, CONFIG_FTRACE_MEM);
-
-	FTRACE_OPEN(fd_funcgraph_cpu,"options/funcgraph-cpu");
-	FTRACE_OPEN(fd_funcgraph_proc,"options/funcgraph-proc");
-	FTRACE_OPEN(fd_funcgraph_abstime,"options/funcgraph-abstime");
-	FTRACE_OPEN(fd_funcgraph_duration,"options/funcgraph-duration");
-
-	FTRACE_CONF(fd_funcgraph_cpu, "1");
-	FTRACE_CONF(fd_funcgraph_proc, "1");
-	FTRACE_CONF(fd_funcgraph_abstime, "1");
-	FTRACE_CONF(fd_funcgraph_duration, "1");
+//	FTRACE_CONF(fd_set_graph_function, CONFIG_TRACING_FUNCTIONS);
+//	FTRACE_CONF(fd_set_graph_function,"find_lowest_rq\n");
+//	FTRACE_CONF(fd_set_graph_function,"check_preempt_curr_rt\n");
+	FTRACE_CONF(fd_set_graph_function, "cpupri_find\n");
+//	FTRACE_CONF(fd_set_graph_function, "build_taskaff_mask\n");
+//	FTRACE_CONF(fd_set_graph_function, "cpupri_taskaff_find\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "try_to_wake_up\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "push_rt_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "find_lowest_rq\n"); 
+//	FTRACE_CONF(fd_set_ftrace_filter, "task_woken_rt\n"); 
+//	FTRACE_CONF(fd_set_ftrace_filter, "select_task_rq_rt\n"); 
+//	FTRACE_CONF(fd_set_ftrace_filter, "build_taskaff_mask\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "cpupri_taskaff_find\n");
+	FTRACE_CONF(fd_set_ftrace_filter, "cpupri_find\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "check_preempt_curr_rt\n");
+# endif
 
 	return 0;
 }
 
 int ftrace_start(void) {
+
+# ifdef CONFIG_USE_FTRACE
+	FTRACE_CONF(fd_tracing_current, "function_graph");
+ 	FTRACE_OPEN(fd_funcgraph_cpu,"options/funcgraph-cpu");
+ 	FTRACE_OPEN(fd_funcgraph_proc,"options/funcgraph-proc");
+ 	FTRACE_OPEN(fd_funcgraph_abstime,"options/funcgraph-abstime");
+ 	FTRACE_OPEN(fd_funcgraph_duration,"options/funcgraph-duration");
+
+	FTRACE_CONF(fd_funcgraph_cpu, "1");
+	FTRACE_CONF(fd_funcgraph_proc, "1");
+	FTRACE_CONF(fd_funcgraph_abstime, "1");
+	FTRACE_CONF(fd_funcgraph_duration, "1");
+//	FTRACE_CONF(fd_funcgraph_printk, "1");
+# endif
+
+# ifdef CONFIG_USE_SCHED_SWITCH
+//	FTRACE_CONF(fd_funcgraph_printk, "0");
+	FTRACE_CONF(fd_tracing_current, "sched_switch");
+# endif
 	FTRACE_CONF(fd_tracing_enabled, "1");
 	return 0;
 }
 
 int ftrace_stop(void) {
 	FTRACE_CONF(fd_tracing_enabled, "0");
+# ifdef CONFIG_USE_FTRACE
+//	FTRACE_CONF(fd_funcgraph_printk, "0");
+# endif
+	return 0;
+}
+
+int ftrace_close(void) {
+	FTRACE_CLOSE(fd_tracing_buffersize,"buffer_size_kb");
+	FTRACE_CLOSE(fd_tracing_enabled,"tracing_enabled");
+	FTRACE_CLOSE(fd_tracing_current,"current_tracer");
+# ifdef CONFIG_USE_FTRACE
+	FTRACE_CLOSE(fd_set_graph_function,"set_graph_function");
+	FTRACE_CLOSE(fd_set_ftrace_filter,"set_ftrace_filter");
+	FTRACE_CLOSE(fd_funcgraph_cpu,"options/funcgraph-cpu");
+	FTRACE_CLOSE(fd_funcgraph_proc,"options/funcgraph-proc");
+	FTRACE_CLOSE(fd_funcgraph_abstime,"options/funcgraph-abstime");
+	FTRACE_CLOSE(fd_funcgraph_duration,"options/funcgraph-duration");
+// 	FTRACE_CLOSE(fd_funcgraph_printk,"options/trace_printk");
+# endif
 	return 0;
 }
 
@@ -151,6 +205,7 @@ int ftrace_stop(void) {
 # define ftrace_setup() 0
 # define ftrace_start() 0
 # define ftrace_stop() 0
+# define ftrace_close() 0
 #endif
 
 /*Returns the difference between b and a in nanoseconds, taking overflow in account*/
@@ -434,8 +489,8 @@ int main(int argc, char *argv[])
 		filename_trace);
 	fout_trace = stdout;
     } else {
-	fprintf(stderr, "Monitor started: trace will be saved in \"%s\"\n",
-		filename_trace);
+	fprintf(stderr, "Monitor started: buffer %d samples: %d trace will be saved in \"%s\"\n",
+		BUFFER_SIZE*1024,NR_SAMPLES,filename_trace);
     }
 
     strcat(filename_hist, idString);
@@ -491,6 +546,7 @@ int main(int argc, char *argv[])
 
     do_stat();
 
+    ftrace_close();
     fclose(fout_trace);
     fclose(fout_hist);
 

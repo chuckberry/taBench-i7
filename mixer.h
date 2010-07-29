@@ -12,6 +12,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 
+#include "taskaff.h"
 #include "const.h" // BUFLENWORD, BUFLENBYTE
 #include "type.h" // t_sint16
 
