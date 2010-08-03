@@ -2,6 +2,15 @@
 # Check for all warnings and make them become an error
 CFLAGS += -Wall -O3
 CPPFLAGS = $(CFLASG) -pthread
+ifdef CPUAFFINITY
+	 CPPFLAGS += -DCPUAFFINITY
+endif
+ifdef OPTIM_AFFINITY
+	CPPFLAGS += -DOPTIM_AFFINITY
+endif
+ifdef WORST_AFFINITY
+	CPPFLAGS += -DWORST_AFFINITY
+endif
 ifdef TASKAFFINITY
 	CPPFLAGS += -DTASKAFFINITY
 endif
@@ -35,6 +44,11 @@ all:
 	@make nwBench-vanilla
 	@make soft-clean
 	@make TASKAFFINITY=1 nwBench-taskaff
+	@make soft-clean
+	@make CPUAFFINITY=1 OPTIM_AFFINITY=1 nwBench-optim
+	@make soft-clean
+	@make CPUAFFINITY=1 WORST_AFFINITY=1 nwBench-worst
+	@make soft-clean
 	@make monitor-notrace
 	@make soft-clean
 	@make FTRACE=1 monitor-ftrace
@@ -50,6 +64,12 @@ nwBench-vanilla: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
 
 nwBench-taskaff: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
+
+nwBench-optim: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
+
+nwBench-worst: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
 
 monitor-notrace: $(M_OBJS)

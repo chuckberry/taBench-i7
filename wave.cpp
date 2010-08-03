@@ -42,20 +42,71 @@ pid_t wave::get_tid()
 
 void *wave::start_routine(void *_this)
 {
-    char name[10];
-    wave *obj = (wave *)_this;
+	char name[10];
+	wave *obj = (wave *)_this;
 
-    obj->tid = gettid();
+	obj->tid = gettid();
 
-    int err = sem_post(&obj->sem_tid);
-    if (err != 0)
-        perror("wave::sem_post - sem_tid");
+	int err = sem_post(&obj->sem_tid);
+	if (err != 0)
+		perror("wave::sem_post - sem_tid");
 
-    sprintf (name, "wave%d", obj->index);
-    prctl(PR_SET_NAME, name, 0,0,0);
+	sprintf (name, "wave%d", obj->index);
+	prctl(PR_SET_NAME, name, 0,0,0);
 
-    obj->loop();
-    return NULL;
+#ifdef CPUAFFINITY
+	cpu_set_t cpuset;
+        pthread_t thread;
+        int r;
+
+	thread = pthread_self();
+        CPU_ZERO(&cpuset);
+# ifdef OPTIM_AFFINITY
+        if(obj->index == 0){
+                CPU_SET(0, &cpuset);
+        }
+        
+        if(obj->index == 1){
+                CPU_SET(1, &cpuset);
+        }
+        
+        if(obj->index == 2){
+                CPU_SET(2, &cpuset);
+        }
+        
+        if(obj->index == 3){
+                CPU_SET(3, &cpuset);
+        }
+# endif
+# ifdef WORST_AFFINITY
+	
+        if(obj->index == 0){
+                CPU_SET(0, &cpuset);
+        }
+        
+        if(obj->index == 1){
+                CPU_SET(1, &cpuset);
+        }
+        
+        if(obj->index == 2){
+                CPU_SET(2, &cpuset);
+        }
+        
+        if(obj->index == 3){
+                CPU_SET(3, &cpuset);
+        }
+# endif
+ 
+        if((r = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset)) != 0){
+                errno=r;
+                perror("pthread_setaffinity_np");
+                exit(r);
+        }
+       /* fprintf(stderr, "Wave %d is currently running on cpu #%d\n", obj->index, sched_getcpu());*/
+
+#endif /* CPUAFFINITY */
+	obj->loop();
+	return NULL;
 }
 
 void wave::loop()

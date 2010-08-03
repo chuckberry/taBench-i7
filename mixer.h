@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <cstdlib>
 
 #include "taskaff.h"
 #include "const.h" // BUFLENWORD, BUFLENBYTE

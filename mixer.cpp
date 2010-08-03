@@ -64,20 +64,69 @@ pid_t mixer::get_tid()
 
 void *mixer::start_routine(void *_this)
 {
-    char name[10];
-    mixer *obj = (mixer *)_this;
 
-    obj->tid = gettid();
+	char name[10];
+	mixer *obj = (mixer *)_this;
 
-    int err = sem_post(&obj->sem_tid);
-    if (err != 0)
-        perror("mixer::sem_post - sem_tid");
+	obj->tid = gettid();
 
-    sprintf (name, "mixer%d", obj->index);
-    prctl(PR_SET_NAME, name, 0,0,0);
+	int err = sem_post(&obj->sem_tid);
+	if (err != 0)
+		perror("mixer::sem_post - sem_tid");
 
-    obj->loop();
-    return NULL;
+	sprintf (name, "mixer%d", obj->index);
+	prctl(PR_SET_NAME, name, 0,0,0);
+#ifdef CPUAFFINITY
+	cpu_set_t cpuset;
+	pthread_t thread;
+	int r;
+	
+	thread = pthread_self();
+        CPU_ZERO(&cpuset);
+# ifdef OPTIM_AFFINITY
+        if(obj->index == 0){
+                /* m0 on cpu0 */
+                CPU_SET(0, &cpuset);
+        }
+
+        if(obj->index == 1){
+                /* m1 on cpu2 */
+                CPU_SET(2, &cpuset);
+        }
+
+        if(obj->index == 2){
+                /* m2 on cpu2 */
+                CPU_SET(2, &cpuset);
+        }
+# endif
+
+# ifdef WORST_AFFINITY
+        if(obj->index == 0){
+                /* m0 on cpu1 (w0 -> 0 w1 -> 3*/
+                CPU_SET(2, &cpuset);
+        }
+
+        if(obj->index == 1){
+                /* m1 on cpu3 (w2 -> 1 w3 -> 2 */
+                CPU_SET(1, &cpuset);
+        }
+
+        if(obj->index == 2){
+                /* m2 on cpu2 */
+                CPU_SET(3, &cpuset);
+        }
+# endif
+
+        if((r = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset)) != 0){
+                errno=r;
+                perror("pthread_setaffinity_np");
+                exit(r);
+        }
+	
+	/* fprintf(stderr, "Mixer %d is currently running on cpu #%d\n", obj->index, sched_getcpu()); */
+#endif
+	obj->loop();
+	return NULL;
 }
 
 void mixer::start(pid_t t0, pid_t t1)
