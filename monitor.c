@@ -35,9 +35,9 @@
 #define FILE_NAME_HIST "_histg"
 
 #ifdef CONFIG_LONG_RUN
-# define NR_SAMPLES 150
+# define NR_SAMPLES 15000
 #else
-# define NR_SAMPLES 150
+# define NR_SAMPLES 15000
 #endif
 
 #define US_SLEEP 250
@@ -117,6 +117,7 @@ int fd_funcgraph_cpu = 0;
 int fd_funcgraph_proc = 0;
 int fd_funcgraph_abstime = 0;
 int fd_funcgraph_duration = 0;
+int fd_funcgraph_overhead = 0;
 # endif
 
 int ftrace_setup(void) {
@@ -135,12 +136,16 @@ int ftrace_setup(void) {
 	FTRACE_OPEN(fd_set_ftrace_filter,"set_ftrace_filter");
 //	FTRACE_CONF(fd_set_graph_function, CONFIG_TRACING_FUNCTIONS);
 //	FTRACE_CONF(fd_set_graph_function,"find_lowest_rq\n");
+//	FTRACE_CONF(fd_set_graph_function, "task_woken_rt\n"); 
+	FTRACE_CONF(fd_set_graph_function, "push_rt_task\n");
 //	FTRACE_CONF(fd_set_graph_function,"check_preempt_curr_rt\n");
 	FTRACE_CONF(fd_set_graph_function, "cpupri_find\n");
 //	FTRACE_CONF(fd_set_graph_function, "build_taskaff_mask\n");
 //	FTRACE_CONF(fd_set_graph_function, "cpupri_taskaff_find\n");
+//	FTRACE_CONF(fd_set_graph_function, "select_task_rq_rt\n"); 
+//	FTRACE_CONF(fd_set_graph_function, "try_to_wake_up\n");
 //	FTRACE_CONF(fd_set_ftrace_filter, "try_to_wake_up\n");
-//	FTRACE_CONF(fd_set_ftrace_filter, "push_rt_task\n");
+	FTRACE_CONF(fd_set_ftrace_filter, "push_rt_task\n");
 //	FTRACE_CONF(fd_set_ftrace_filter, "find_lowest_rq\n"); 
 //	FTRACE_CONF(fd_set_ftrace_filter, "task_woken_rt\n"); 
 //	FTRACE_CONF(fd_set_ftrace_filter, "select_task_rq_rt\n"); 
@@ -161,11 +166,13 @@ int ftrace_start(void) {
  	FTRACE_OPEN(fd_funcgraph_proc,"options/funcgraph-proc");
  	FTRACE_OPEN(fd_funcgraph_abstime,"options/funcgraph-abstime");
  	FTRACE_OPEN(fd_funcgraph_duration,"options/funcgraph-duration");
+ 	FTRACE_OPEN(fd_funcgraph_overhead,"options/funcgraph-overhead");
 
 	FTRACE_CONF(fd_funcgraph_cpu, "1");
 	FTRACE_CONF(fd_funcgraph_proc, "1");
 	FTRACE_CONF(fd_funcgraph_abstime, "1");
 	FTRACE_CONF(fd_funcgraph_duration, "1");
+	FTRACE_CONF(fd_funcgraph_overhead, "0");
 //	FTRACE_CONF(fd_funcgraph_printk, "1");
 # endif
 
@@ -196,6 +203,7 @@ int ftrace_close(void) {
 	FTRACE_CLOSE(fd_funcgraph_proc,"options/funcgraph-proc");
 	FTRACE_CLOSE(fd_funcgraph_abstime,"options/funcgraph-abstime");
 	FTRACE_CLOSE(fd_funcgraph_duration,"options/funcgraph-duration");
+	FTRACE_CLOSE(fd_funcgraph_overhead,"options/funcgraph-overhead");
 // 	FTRACE_CLOSE(fd_funcgraph_printk,"options/trace_printk");
 # endif
 	return 0;

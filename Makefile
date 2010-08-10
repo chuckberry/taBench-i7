@@ -37,7 +37,7 @@ CFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
 CPPFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
 
 BUILD_ALL='\#!/bin/sh\n					\
-for S in 4 8 16 32; do make BSIZE=$$S; done	\
+for S in 2 4 8 16; do make BSIZE=$$S; done	\
 '
 all:
 	@make soft-clean
@@ -85,7 +85,7 @@ soft-clean:
 	rm -rf *.o *~ cscope.*
 
 clean: soft-clean
-	rm -rf nwBench{,-vanilla,-taskaff}_* monitor{,-notrace,-sched,-ftrace}_* build_all.sh
+	rm -rf nwBench{,-vanilla,-taskaff,-optim,-worst}_* monitor{,-notrace,-sched,-ftrace}_* build_all.sh
 
 index:
 	find `pwd` -regex ".*\.[ch]\(pp\)?" -print > cscope.files

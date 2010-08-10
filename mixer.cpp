@@ -188,7 +188,7 @@ void mixer::emptyBuffer(t_sint16 *buf, int pos)
         perror("mixer::pthread_mutex_lock");
     }
 
-    if (pos) {
+    if (!pos) {
         inbuf0 = buf;
     } else {
         inbuf1 = buf;
@@ -206,7 +206,7 @@ void mixer::emptyBuffer(t_sint16 *buf, int pos)
         perror("pthread_mutex_unlock");
     }
 
-    if (pos) {
+    if (!pos) {
         sem_wait(&sema0);
     } else {
         sem_wait(&sema1);
