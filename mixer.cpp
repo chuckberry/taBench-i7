@@ -108,12 +108,12 @@ void *mixer::start_routine(void *_this)
 
         if(obj->index == 1){
                 /* m1 on cpu3 (w2 -> 1 w3 -> 2 */
-                CPU_SET(1, &cpuset);
+                CPU_SET(3, &cpuset);
         }
 
         if(obj->index == 2){
                 /* m2 on cpu2 */
-                CPU_SET(3, &cpuset);
+                CPU_SET(1, &cpuset);
         }
 # endif
 

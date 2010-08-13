@@ -39,12 +39,23 @@ CPPFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
 BUILD_ALL='\#!/bin/sh\n					\
 for S in 2 4 8 16; do make BSIZE=$$S; done	\
 '
+BUILD_CPUAFF='\#!/bin/sh\n					\
+for S in 2 4 8 16; do make BSIZE=$$S cpuaffinity; done	\
+'
+
 all:
 	@make soft-clean
 	@make nwBench-vanilla
 	@make soft-clean
 	@make TASKAFFINITY=1 nwBench-taskaff
 	@make soft-clean
+	@make monitor-notrace
+	@make soft-clean
+	@make FTRACE=1 monitor-ftrace
+	@make soft-clean
+	@make SCHED_SWITCH=1 monitor-sched
+
+cpuaffinity:
 	@make CPUAFFINITY=1 OPTIM_AFFINITY=1 nwBench-optim
 	@make soft-clean
 	@make CPUAFFINITY=1 WORST_AFFINITY=1 nwBench-worst
@@ -54,6 +65,11 @@ all:
 	@make FTRACE=1 monitor-ftrace
 	@make soft-clean
 	@make SCHED_SWITCH=1 monitor-sched
+
+cpuaff_all_version:
+	echo -e ${BUILD_CPUAFF} > build_cpuaff.sh
+	chmod a+x build_cpuaff.sh
+	./build_cpuaff.sh
 
 all_version:
 	echo -e ${BUILD_ALL} > build_all.sh
@@ -85,7 +101,7 @@ soft-clean:
 	rm -rf *.o *~ cscope.*
 
 clean: soft-clean
-	rm -rf nwBench{,-vanilla,-taskaff,-optim,-worst}_* monitor{,-notrace,-sched,-ftrace}_* build_all.sh
+	rm -rf nwBench{,-vanilla,-taskaff,-optim,-worst}_* monitor{,-notrace,-sched,-ftrace}_* build_all.sh build_cpuaff.sh
 
 index:
 	find `pwd` -regex ".*\.[ch]\(pp\)?" -print > cscope.files

@@ -85,15 +85,15 @@ void *wave::start_routine(void *_this)
         }
         
         if(obj->index == 1){
-                CPU_SET(1, &cpuset);
+                CPU_SET(3, &cpuset);
         }
         
         if(obj->index == 2){
-                CPU_SET(2, &cpuset);
+                CPU_SET(1, &cpuset);
         }
         
         if(obj->index == 3){
-                CPU_SET(3, &cpuset);
+                CPU_SET(2, &cpuset);
         }
 # endif
  
