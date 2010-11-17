@@ -35,9 +35,9 @@
 #define FILE_NAME_HIST "_histg"
 
 #ifdef CONFIG_LONG_RUN
-# define NR_SAMPLES 15000
+# define NR_SAMPLES 150000
 #else
-# define NR_SAMPLES 15000
+# define NR_SAMPLES 150000
 #endif
 
 #define US_SLEEP 250
@@ -108,7 +108,7 @@ static long wake_time_hist[HIST_BINS];
 int fd_tracing_enabled = 0;
 int fd_tracing_current = 0;
 int fd_tracing_buffersize = 0;
-//int fd_funcgraph_printk = 0;
+int fd_funcgraph_printk = 0;
 
 # ifdef CONFIG_USE_FTRACE
 int fd_set_graph_function = 0;
@@ -129,29 +129,41 @@ int ftrace_setup(void) {
 	FTRACE_CONF(fd_tracing_enabled, "0");
 	FTRACE_CONF(fd_tracing_current, "nop\n");
 	FTRACE_CONF(fd_tracing_buffersize, CONFIG_FTRACE_MEM);
-// 	FTRACE_OPEN(fd_funcgraph_printk,"options/trace_printk");
+ 	FTRACE_OPEN(fd_funcgraph_printk,"options/trace_printk");
 
 # ifdef CONFIG_USE_FTRACE
 	FTRACE_OPEN(fd_set_graph_function,"set_graph_function");
 	FTRACE_OPEN(fd_set_ftrace_filter,"set_ftrace_filter");
 //	FTRACE_CONF(fd_set_graph_function, CONFIG_TRACING_FUNCTIONS);
-//	FTRACE_CONF(fd_set_graph_function,"find_lowest_rq\n");
 //	FTRACE_CONF(fd_set_graph_function, "task_woken_rt\n"); 
-	FTRACE_CONF(fd_set_graph_function, "push_rt_task\n");
+	FTRACE_CONF(fd_set_graph_function, "pull_rt_task\n");
+//	FTRACE_CONF(fd_set_graph_function, "post_schedule_rt\n");
+//	FTRACE_CONF(fd_set_graph_function, "push_rt_task\n");
+//	FTRACE_CONF(fd_set_graph_function, "dequeue_pushable_task\n");
+//	FTRACE_CONF(fd_set_graph_function, "cpupri_find\n");
+//	FTRACE_CONF(fd_set_graph_function, "find_lowest_rq\n");
+//	FTRACE_CONF(fd_set_graph_function, "select_task_rq_rt\n"); 
 //	FTRACE_CONF(fd_set_graph_function,"check_preempt_curr_rt\n");
-	FTRACE_CONF(fd_set_graph_function, "cpupri_find\n");
 //	FTRACE_CONF(fd_set_graph_function, "build_taskaff_mask\n");
 //	FTRACE_CONF(fd_set_graph_function, "cpupri_taskaff_find\n");
-//	FTRACE_CONF(fd_set_graph_function, "select_task_rq_rt\n"); 
+//	FTRACE_CONF(fd_set_graph_function, "find_taskaff_cpu\n");
 //	FTRACE_CONF(fd_set_graph_function, "try_to_wake_up\n");
 //	FTRACE_CONF(fd_set_ftrace_filter, "try_to_wake_up\n");
-	FTRACE_CONF(fd_set_ftrace_filter, "push_rt_task\n");
-//	FTRACE_CONF(fd_set_ftrace_filter, "find_lowest_rq\n"); 
 //	FTRACE_CONF(fd_set_ftrace_filter, "task_woken_rt\n"); 
+	FTRACE_CONF(fd_set_ftrace_filter, "pull_rt_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "post_schedule_rt\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "push_rt_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "activate_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "deactivate_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "dequeue_pushable_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "find_lock_lowest_rq\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "pick_next_pushable_task\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "cpupri_find\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "find_lowest_rq\n"); 
 //	FTRACE_CONF(fd_set_ftrace_filter, "select_task_rq_rt\n"); 
 //	FTRACE_CONF(fd_set_ftrace_filter, "build_taskaff_mask\n");
 //	FTRACE_CONF(fd_set_ftrace_filter, "cpupri_taskaff_find\n");
-	FTRACE_CONF(fd_set_ftrace_filter, "cpupri_find\n");
+//	FTRACE_CONF(fd_set_ftrace_filter, "find_taskaff_cpu\n");
 //	FTRACE_CONF(fd_set_ftrace_filter, "check_preempt_curr_rt\n");
 # endif
 
@@ -173,11 +185,11 @@ int ftrace_start(void) {
 	FTRACE_CONF(fd_funcgraph_abstime, "1");
 	FTRACE_CONF(fd_funcgraph_duration, "1");
 	FTRACE_CONF(fd_funcgraph_overhead, "0");
-//	FTRACE_CONF(fd_funcgraph_printk, "1");
+	FTRACE_CONF(fd_funcgraph_printk, "0");
 # endif
 
 # ifdef CONFIG_USE_SCHED_SWITCH
-//	FTRACE_CONF(fd_funcgraph_printk, "0");
+	FTRACE_CONF(fd_funcgraph_printk, "0");
 	FTRACE_CONF(fd_tracing_current, "sched_switch");
 # endif
 	FTRACE_CONF(fd_tracing_enabled, "1");
@@ -187,7 +199,7 @@ int ftrace_start(void) {
 int ftrace_stop(void) {
 	FTRACE_CONF(fd_tracing_enabled, "0");
 # ifdef CONFIG_USE_FTRACE
-//	FTRACE_CONF(fd_funcgraph_printk, "0");
+	FTRACE_CONF(fd_funcgraph_printk, "0");
 # endif
 	return 0;
 }
@@ -204,7 +216,7 @@ int ftrace_close(void) {
 	FTRACE_CLOSE(fd_funcgraph_abstime,"options/funcgraph-abstime");
 	FTRACE_CLOSE(fd_funcgraph_duration,"options/funcgraph-duration");
 	FTRACE_CLOSE(fd_funcgraph_overhead,"options/funcgraph-overhead");
-// 	FTRACE_CLOSE(fd_funcgraph_printk,"options/trace_printk");
+ 	FTRACE_CLOSE(fd_funcgraph_printk,"options/trace_printk");
 # endif
 	return 0;
 }

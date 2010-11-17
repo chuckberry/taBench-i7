@@ -76,7 +76,7 @@ void *mixer::start_routine(void *_this)
 
 	sprintf (name, "mixer%d", obj->index);
 	prctl(PR_SET_NAME, name, 0,0,0);
-#ifdef CPUAFFINITY
+#if defined (CPUAFFINITY) && !defined (TASKAFFINITY)
 	cpu_set_t cpuset;
 	pthread_t thread;
 	int r;

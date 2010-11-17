@@ -37,10 +37,10 @@ CFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
 CPPFLAGS += -DCONFIG_CODE_VERSION=$(VERSION)
 
 BUILD_ALL='\#!/bin/sh\n					\
-for S in 2 4 8 16; do make BSIZE=$$S; done	\
+for S in 2 4 8 16 32; do make BSIZE=$$S; done	\
 '
 BUILD_CPUAFF='\#!/bin/sh\n					\
-for S in 2 4 8 16; do make BSIZE=$$S cpuaffinity; done	\
+for S in 2 4 8 16 32; do make BSIZE=$$S cpuaffinity; done	\
 '
 
 all:
@@ -56,9 +56,13 @@ all:
 	@make SCHED_SWITCH=1 monitor-sched
 
 cpuaffinity:
-	@make CPUAFFINITY=1 OPTIM_AFFINITY=1 nwBench-optim
+	@make CPUAFFINITY=1 OPTIM_AFFINITY=1 nwBench-optim-vanilla
 	@make soft-clean
-	@make CPUAFFINITY=1 WORST_AFFINITY=1 nwBench-worst
+	@make CPUAFFINITY=1 WORST_AFFINITY=1 nwBench-worst-vanilla
+	@make soft-clean
+	@make CPUAFFINITY=1 OPTIM_AFFINITY=1 TASKAFFINITY=1 nwBench-optim-taskaff
+	@make soft-clean
+	@make CPUAFFINITY=1 WORST_AFFINITY=1 TASKAFFINITY=1 nwBench-worst-taskaff
 	@make soft-clean
 	@make monitor-notrace
 	@make soft-clean
@@ -82,10 +86,16 @@ nwBench-vanilla: $(B_OBJS)
 nwBench-taskaff: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
 
-nwBench-optim: $(B_OBJS)
+nwBench-optim-vanilla: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
 
-nwBench-worst: $(B_OBJS)
+nwBench-worst-vanilla: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
+
+nwBench-optim-taskaff: $(B_OBJS)
+	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
+
+nwBench-worst-taskaff: $(B_OBJS)
 	g++ $(B_LDFLAGS) $(B_OBJS) -o $@_$(BSIZE)KB
 
 monitor-notrace: $(M_OBJS)

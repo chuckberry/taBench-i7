@@ -5,7 +5,8 @@ cat - <<EOF
 
 $1 --> Makefile label
 $2 --> binaries destination path
-$3 --> [optional] monitor attributes, that are function traced nr of sample
+$3 --> monitor attributes, that are function traced nr of sample
+$4 --> suffix for bmarks folder
 
 EOF
 }
@@ -13,14 +14,20 @@ EOF
 LABEL_IN="$1"
 PATH_BIN="$2"
 MONITOR_ATTRIB="$3"
+BIN_FOLDER="bmarks-$4"
 
-if [[ x$LABEL_IN == "x" || x$PATH_BIN == "x" ]]; then
+if [[ x$LABEL_IN == "x" || x$MONITOR_ATTRIB == "x" || x$PATH_BIN == "x" || x$BIN_FOLDER == "x" ]]; then
 	print_usage
 	exit 1;
 fi
 
+if [[ -d "$PATH_BIN/$BIN_FOLDER" ]]; then
+	echo "$BIN_FOLDER exists"
+	exit 1;
+fi
+
 LABEL=`cat Makefile | grep "$LABEL_IN:"`
-if [ x$LABEL == "x" ]; then
+if [[ x$LABEL == "x" ]]; then
 	echo "Makefile label not exists"
 	exit 1;
 fi
@@ -30,13 +37,15 @@ if [ x$BINARIES != "x" ]; then
 	make clean
 fi
 
-make $1
-cp nwBench-* "$2/bmarks"
-cp monitor-* "$2/bmarks"
+mkdir $PATH_BIN/$BIN_FOLDER
+
+make $LABEL_IN
+cp nwBench-* "$PATH_BIN/$BIN_FOLDER"
+cp monitor-* "$PATH_BIN/$BIN_FOLDER"
 make clean
 
-cd $2
+cd $PATH_BIN
 echo "******** compilation of `date` ***************" >> compile_log.txt
-echo "label used: $1" >> compile_log.txt
-echo "monitor attrib: $3" >> compile_log.txt
+echo "label used: $LABEL_IN" >> compile_log.txt
+echo "monitor attrib: $MONITOR_ATTRIB" >> compile_log.txt
 echo "******** end report of `date`  ***************" >> compile_log.txt
